@@ -4,7 +4,7 @@ using namespace std;
 
 double mult[3][5] = {
     0, 1, 1.1, 1.2, 1.2,
-    1, 1, 1.1, 1.1, 1.1,
+    1, 1, 1.2, 1.2, 1.1,
     1, 1, 1, 1, 1
 };
 
@@ -66,7 +66,7 @@ struct Team{
 
 vector<string> donthave = {"´ºÃ¨","Çé²¡","Ê¥Ç§"};//"Ê¥´¸"
 
-vector<string> iused = {};//"a101"
+vector<string> iused = {};//"b201"
 
 int bcnt(int a)
 {
@@ -123,6 +123,12 @@ bool checkteams(Team& a, Team& b, Team& c)
 
 int main()
 {
+    for(auto sx: donthave)
+    {
+        cout<<sx<<' ';
+    }
+    cout<<endl;
+    freopen("pcr_in.txt", "r", stdin);
     vector<Team> teams;
     string line,s;
     while(getline(cin,line,'\n'))
