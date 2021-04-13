@@ -4,8 +4,8 @@ using namespace std;
 
 double mult[3][5] = {
     0, 1, 1.1, 1.2, 1.2,
-    1, 1, 1.2, 1.2, 1.1,
-    1, 1, 1, 1, 1
+    0, 0, 0, 1.1, 1.1,
+    1.1, 1.1, 1.3, 1.3, 1.4
 };
 
 /*
@@ -26,6 +26,10 @@ struct Team{
     string id;
     int dmg;
     string use[5];
+    Team()
+    {
+
+    }
     Team(string id_, int dmg_, string* use_)
     {
         id = id_;
@@ -33,6 +37,15 @@ struct Team{
         for(int i = 0; i < 5; i++)
         {
             use[i] = use_[i];
+        }
+    }
+    Team& operator=(const Team& t)
+    {
+        id = t.id;
+        dmg = t.dmg;
+        for(int i = 0; i < 5; i++)
+        {
+            use[i] = t.use[i];
         }
     }
     int getphase()
@@ -62,11 +75,28 @@ struct Team{
     {
         return mult[getphase()][getbossid()];
     }
+    bool isMagic()
+    {
+        vector<string> mgs = {"xcw", "Ë®ºÚ", "ÖÐ¶þ", "yly"};
+        auto cnt = 0;
+        for(auto s1 : mgs)
+        {
+            for(auto s2 : use)
+            {
+                if(s1 == s2)
+                    cnt++;
+            }
+        }
+        return cnt >= 1;
+    }
 };
 
-vector<string> donthave = {"´ºÃ¨","Çé²¡","Ê¥Ç§"};//"Ê¥´¸"
+vector<string> donthave = {"Ê¥Ç§","´ºÃ¨","Çé²¡"};//character you dont have, but sometimes you may borrow one
 
 vector<string> iused = {};//"b201"
+
+bool no_magic = false; // use true if you want 3 phys teams
+bool no_matter_magic = true; // use true to choose one magic team whatever first
 
 int bcnt(int a)
 {
@@ -131,6 +161,12 @@ int main()
     freopen("pcr_in.txt", "r", stdin);
     vector<Team> teams;
     string line,s;
+
+    Team whatever_magic;
+    double whatever_magic_d = -1;
+
+    if(no_matter_magic)
+        no_magic = true;
     while(getline(cin,line,'\n'))
     {
         string bossid;
@@ -144,9 +180,20 @@ int main()
         {
             continue;
         }
-
-        teams.push_back(Team(bossid, dmg, use));
+        auto team = Team(bossid, dmg, use);
+        if(no_matter_magic && team.isMagic())
+        {
+            if(team.dmg * team.getmult() > whatever_magic_d)
+            {
+                whatever_magic_d = team.dmg * team.getmult();
+                whatever_magic = team;
+            }
+        }
+        if(no_magic && team.isMagic()) continue;
+        teams.push_back(team);
     }
+    if(whatever_magic.id != "")
+        teams.push_back(whatever_magic);
     cout<<teams.size()<<endl;
     vector<tuple<double, int, int, int> > res;
     for(int i = 0; i < teams.size(); i++)
