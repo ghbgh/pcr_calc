@@ -3,9 +3,9 @@ using namespace std;
 
 
 double mult[3][5] = {
-    0, 1, 1.1, 1.2, 1.2,
-    0, 0, 0, 1.1, 1.1,
-    1.1, 1.1, 1.3, 1.3, 1.4
+    0, 0, 0, 0, 1.1,
+    1, 1, 1.1, 1.3, 1.3,
+    1.0, 1.0, 1.3, 1.2, 1.2
 };
 
 /*
@@ -47,6 +47,7 @@ struct Team{
         {
             use[i] = t.use[i];
         }
+        return *this;
     }
     int getphase()
     {
@@ -91,7 +92,7 @@ struct Team{
     }
 };
 
-vector<string> donthave = {"Ê¥Ç§","´ºÃ¨","Çé²¡"};//character you dont have, but sometimes you may borrow one
+vector<string> donthave = {"Ê¥´¸x","Ê¥Ç§","´ºÃ¨","Çé²¡","Á÷ÏÄ"};//character you dont have, but sometimes you may borrow one
 
 vector<string> iused = {};//"b201"
 
@@ -219,9 +220,9 @@ int main()
     for(int i = 0; i < min(50, (int)res.size()); i++)
     {
         int dmg = get<0>(res[i]);
-        int x = get<1>(res[i]);
+        int x = get<3>(res[i]);
         int y = get<2>(res[i]);
-        int z = get<3>(res[i]);
+        int z = get<1>(res[i]);
         cout<<dmg<<' ';
         cout<<teams[x].id<<' ';
         cout<<teams[y].id<<' ';

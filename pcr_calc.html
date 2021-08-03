@@ -1,0 +1,176 @@
+<html>
+<script>
+
+function popcnt32(n) {
+  n = n - ((n >> 1) & 0x55555555)
+  n = (n & 0x33333333) + ((n >> 2) & 0x33333333)
+  return ((n + (n >> 4) & 0xF0F0F0F) * 0x1010101) >> 24
+}
+
+var mult = {};
+var donthave = [];
+var used_team = [];
+var teams = [];
+
+var magic_use = {"xcw":1, "水黑":1, "中二":1, "yly":1};
+var magic_use_num = 1;
+
+var no_matter_magic = true; // use true to choose one magic team whatever first
+
+
+class Team
+{
+	constructor(id, dmg, use)
+	{
+		this.id = id.toLowerCase(); //string
+		this.dmg = dmg; //number
+		this.use = use; //array<string>
+		
+		this.phaseid = id.length > 0 ? id.charCodeAt(0) - 'a'.charCodeAt(0) : 0;
+		this.bossid = 0;
+		for(let i = 0; i < this.id.length; i++)
+		{
+			let o = this.id.charCodeAt(i) - '1'.charCodeAt(0);
+			if(o >= 0 && o < 9) {
+				this.bossid = o;
+				break;
+			}
+		}
+		this.mult = 0;
+		this.ismagic = false;
+		this.refresh();
+	}
+	refresh()
+	{
+		this.mult = 1; //TODO
+		this.ismagic = false;
+		let cnt_use = 0;
+		for(let s of this.use)
+		{
+			if (s in magic_use)
+			{
+				cnt_use ++;
+			}
+		}
+		this.ismagic = cnt_use >= magic_use_num;
+	}
+	getscore()
+	{
+		return this.dmg * this.mult;
+	}
+}
+
+function checkteams(teams)
+{
+	let all = [];
+	for (let i = 0; i < 5; i++)
+	{
+		for (let j = 0; j < 3; j++)
+			all.push(teams[j].use[i]);
+	}
+	all.sort();
+	let allx = [];
+	let last = 0;
+	for(let i = 0; i < all.length; i++)
+	{
+		if (last != all[i])	
+			allx.push(all[i]);
+		last = all[i];
+	}
+	all = allx;
+	let bit = [0,0,0];
+	let ld = [0,0,0];
+	let lk = [0,0,0];
+	let dbit = 0;
+	for(let i = 0; i < 5; i++)
+	{
+		for(let j = 0; j < 3; j++)
+			bit[j] |= 1 << all.indexOf(teams[j]);
+	}
+	for(let f of donthave) //记录没有的
+	{
+		dbit |= 1 << all.indexOf(f);
+	}
+    for(let i = 0; i < 3; i++) //没有的必须借
+	{
+        if(popcnt32(bit[i] & dbit) > 1) return false;
+        if(popcnt32(bit[i] & dbit) == 1)
+        {
+            //cout<<all[__builtin_ctz(bit[i] & dbit)]<<endl;
+            ld[i] = 1;
+        }
+    }
+    for(let i = 0; i < 9; i++) //贪心依次尝试，9次保证3次循环找三个
+    {
+        if(lk[i%3]) continue;
+        let xc = popcnt32(bit[i%3] & bit[(i+1)%3]);
+        if(xc + ld[i%3] + ld[(i+1)%3] > 2) return false;
+        if(xc + ld[i%3] + ld[(i+1)%3] == 2) {
+            ld[i%3] = ld[(i+1)%3] = 1;
+            lk[i%3] = 1;
+        }
+    }
+    return true;
+}
+
+function solve(all_teams)
+{
+	let best_magic_team = null;
+	let best_magic_team_dmg = -1;
+	let teams = [];
+	for(let i = 0; i < all_teams.length; i++)
+	{
+		let t = all_teams[i];
+		all_teams[i].refresh();
+		if(no_matter_magic && t.ismagic)
+		{
+			if(all_teams[i].getscore() > best_magic_team_dmg)
+			{
+				best_magic_team_dmg = all_teams[i].getscore();
+				best_magic_team = t;
+			}
+			continue;
+		}
+		teams.push(t);
+	}
+	if(no_matter_magic && best_magic_team != null)
+	{
+		teams.push(best_magic_team);
+	}
+	let res = [];
+	for(let i = 0; i < teams.length; i++)
+	{
+		if(used_team[0] != null && used_team[0] != teams[i].id) continue;
+		for(let j = 0; j < (used_team[0] != null ? teams.length : i); j++)
+		{
+			if(used_team[1] != null && used_team[1] != teams[j].id) continue;
+			for(let k = 0; k < (used_team[1] != null ? teams.length : j); k++)
+			{
+				let dmg = teams[i].getscore();
+				if(checkteams([teams[i], teams[j], teams[k]]))
+				{
+					res.push([dmg, i, j, k]);
+				}
+			}
+		}
+	}
+	res.sort();
+	res.reverse();
+	
+	for (let i = 0; i < res.length; i++)
+	{
+		let r = res[i];
+		console.log(r[0], teams[r[1]].id, teams[r[1]].use,
+							teams[r[2]].id, teams[r[2]].use,
+							teams[r[3]].id, teams[r[3]].use);
+	}
+}
+
+let all_teams_ = [
+	new Team("a111", 123, ["aaa", "gou"]),
+	new Team("a211", 123, ["xcw", "gou"]),
+	new Team("a311", 123, ["gou", "lang"]),
+];
+solve(all_teams_);
+</script>
+</html>
